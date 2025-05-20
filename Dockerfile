@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libxml2-dev \
     libcurl4-openssl-dev \
+    libonig-dev \       # <-- HIER HINZUGEFÜGT (für mbstring)
+    pkg-config \        # <-- HIER HINZUGEFÜGT (oft nützlich)
     unzip \
     git \
     && rm -rf /var/lib/apt/lists/*
