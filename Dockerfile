@@ -7,8 +7,8 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libxml2-dev \
     libcurl4-openssl-dev \
-    libonig-dev \       # für mbstring
-    pkg-config \        # oft nützlich für Build-Prozesse
+    libonig-dev \
+    pkg-config \
     unzip \
     git \
     && rm -rf /var/lib/apt/lists/*
