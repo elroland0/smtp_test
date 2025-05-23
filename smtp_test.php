@@ -6,7 +6,6 @@ use PHPMailer\PHPMailer\Exception;
 
 // Lade Composer Autoloader (wenn du PHPMailer via Composer installiert hast)
 require 'vendor/autoload.php';
-
 // --- Alternativ: Manueller Include, falls du PHPMailer manuell heruntergeladen hast ---
 // Kopiere den 'src' Ordner von PHPMailer in dein Projektverzeichnis, z.B. als 'PHPMailer'
 // require 'PHPMailer/src/Exception.php';
@@ -18,13 +17,13 @@ $message = '';
 $error_message = '';
 $smtp_debug_output = '';
 
-// Standardwerte für das Formular (damit man nicht immer alles neu tippen muss)
+// Standardwerte für das Formular
 $defaults = [
     'smtp_host' => 'smtp.example.com',
     'smtp_port' => '587',
     'smtp_secure' => 'tls', // 'ssl' oder 'tls' oder 'none'
-    'smtp_user' => 'dein_benutzername@example.com',
-    'smtp_pass' => '',
+    'smtp_user' => '', // Standardmäßig leer lassen
+    'smtp_pass' => '', // Standardmäßig leer lassen
     'from_email' => 'absender@example.com',
     'from_name' => 'SMTP Tester',
     'to_email' => 'empfaenger@example.com',
@@ -53,9 +52,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $mail->isSMTP();
         $mail->Host       = $_POST['smtp_host'];
-        $mail->SMTPAuth   = true; // Aktiviere SMTP-Authentifizierung
-        $mail->Username   = $_POST['smtp_user'];
-        $mail->Password   = $_POST['smtp_pass'];
+
+        // SMTP Authentifizierung nur aktivieren, wenn ein Benutzername angegeben wurde
+        if (!empty($_POST['smtp_user'])) {
+            $mail->SMTPAuth   = true;
+            $mail->Username   = $_POST['smtp_user'];
+            $mail->Password   = $_POST['smtp_pass']; // Passwort kann leer sein, wenn der Server das erlaubt
+        } else {
+            $mail->SMTPAuth   = false; // Keine SMTP-Authentifizierung
+        }
 
         if ($_POST['smtp_secure'] !== 'none') {
             $mail->SMTPSecure = $_POST['smtp_secure'] === 'tls' ? PHPMailer::ENCRYPTION_STARTTLS : PHPMailer::ENCRYPTION_SMTPS;
@@ -145,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="message error"><?php echo htmlspecialchars($error_message); ?></div>
         <?php endif; ?>
 
-        <form action="smtp_test.php" method="post">
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
             <h2>SMTP Server Einstellungen</h2>
             <label for="smtp_host">SMTP Host:</label>
             <input type="text" id="smtp_host" name="smtp_host" value="<?php echo htmlspecialchars($form_values['smtp_host']); ?>" required>
@@ -161,11 +166,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <option value="none" <?php echo ($form_values['smtp_secure'] == 'none') ? 'selected' : ''; ?>>Keine</option>
             </select><br><br>
 
-            <label for="smtp_user">SMTP Benutzername:</label>
-            <input type="text" id="smtp_user" name="smtp_user" value="<?php echo htmlspecialchars($form_values['smtp_user']); ?>" required>
+            <label for="smtp_user">SMTP Benutzername (optional):</label>
+            <input type="text" id="smtp_user" name="smtp_user" value="<?php echo htmlspecialchars($form_values['smtp_user']); ?>">
 
-            <label for="smtp_pass">SMTP Passwort:</label>
-            <input type="password" id="smtp_pass" name="smtp_pass" value="<?php echo htmlspecialchars($form_values['smtp_pass']); ?>" required>
+            <label for="smtp_pass">SMTP Passwort (optional, nur wenn Benutzername angegeben):</label>
+            <input type="password" id="smtp_pass" name="smtp_pass" value="<?php echo htmlspecialchars($form_values['smtp_pass']); ?>">
 
             <h2>E-Mail Details</h2>
             <label for="from_email">Von E-Mail:</label>
